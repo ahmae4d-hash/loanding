@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina AI | Master-Grade Visual Synthesis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,700;0,800;1,300;1,400;1,700;1,800&family=Playfair+Display:ital,wght@1,400;1,700;1,900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff4d94;
+            --secondary: #7000ff;
+            --accent: #00f2fe;
+            --dark-bg: #020617;
+            --dark-card: #0f172a;
+            --dark-border: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --grad-linear: linear-gradient(135deg, #ff4d94 0%, #7000ff 100%);
+            --grad-glow: radial-gradient(circle at center, rgba(112, 0, 255, 0.15) 0%, transparent 70%);
+            --glass: rgba(15, 23, 42, 0.8);
+            --transition-slow: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-fast: all 0.3s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+        html { scroll-behavior: smooth; overflow-x: hidden; }
+        
+        body { 
+            background-color: var(--dark-bg); 
+            color: var(--text-main); 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            font-style: italic;
+            line-height: 1.8;
+        }
+
+        h1, h2, h3, h4, .logo-text { font-family: 'Playfair Display', serif; font-style: italic; }
+        .wavy { font-family: 'Dancing Script', cursive; color: var(--primary); font-style: normal; }
+
+        /* --- Scrollbar --- */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--dark-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--grad-linear); border-radius: 10px; }
+
+        /* --- Global Animations --- */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes rotateGlow { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes floatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        @keyframes pulseGlow { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+        /* --- Navbar --- */
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 25px 8%; position: fixed; width: 100%; top: 0; z-index: 3000;
+            transition: var(--transition-slow); background: transparent;
+        }
+        nav.scrolled {
+            background: rgba(2, 6, 23, 0.9);
+            backdrop-filter: blur(20px);
+            padding: 15px 8%;
+            border-bottom: 1px solid var(--dark-border);
+        }
+        .logo-group { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .logo-icon { width: 40px; height: 40px; background: var(--grad-linear); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: white; transform: rotate(-10deg); }
+        .logo-text { font-size: 2rem; color: white; font-weight: 900; letter-spacing: -1px; }
+
+        .nav-links { display: flex; gap: 40px; list-style: none; }
+        .nav-link { color: var(--text-dim); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: var(--transition-fast); position: relative; }
+        .nav-link:hover, .nav-link.active { color: var(--primary); }
+        .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: -5px; left: 0; background: var(--primary); transition: var(--transition-fast); }
+        .nav-link:hover::after { width: 100%; }
+
+        /* --- Hero Section --- */
+        .hero {
+            height: 100vh; width: 100%; position: relative;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; padding-top: 80px;
+        }
+        .hero-bg-img {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1920') no-repeat center center/cover;
+            filter: brightness(0.3); z-index: -2; transform: scale(1.1);
+        }
+        .hero-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 50%, transparent 0%, var(--dark-bg) 90%);
+            z-index: -1;
+        }
+        .hero-content { text-align: center; max-width: 1100px; z-index: 5; animation: fadeIn 1.5s ease; }
+        .badge { background: rgba(255,255,255,0.05); padding: 8px 20px; border-radius: 50px; border: 1px solid var(--dark-border); display: inline-block; margin-bottom: 25px; color: var(--accent); font-weight: 700; font-size: 0.85rem; letter-spacing: 2px; }
+        .hero h1 { font-size: clamp(3rem, 10vw, 7rem); font-weight: 900; line-height: 1; margin-bottom: 30px; letter-spacing: -2px; }
+        .hero p { font-size: 1.4rem; color: var(--text-dim); max-width: 800px; margin: 0 auto 50px; }
+
+        .btn { padding: 18px 45px; border-radius: 15px; font-weight: 800; text-decoration: none; transition: var(--transition-slow); cursor: pointer; display: inline-block; font-style: normal; }
+        .btn-glow { background: var(--grad-linear); color: white; box-shadow: 0 0 30px rgba(112, 0, 255, 0.4); position: relative; overflow: hidden; }
+        .btn-glow:hover { transform: translateY(-5px); box-shadow: 0 0 50px rgba(255, 77, 148, 0.6); }
+        .btn-outline { border: 2px solid var(--dark-border); color: white; margin-left: 15px; background: rgba(255,255,255,0.02); }
+        .btn-outline:hover { background: white; color: var(--dark-bg); }
+
+        /* --- Dashboard Mockup Section --- */
+        .preview-tool { padding: 100px 8%; background: var(--dark-bg); position: relative; }
+        .tool-window {
+            background: var(--dark-card); border-radius: 30px; border: 1px solid var(--dark-border);
+            height: 700px; display: grid; grid-template-columns: 280px 1fr 300px; overflow: hidden;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.5);
+        }
+        .tool-sidebar { background: #0b1222; border-right: 1px solid var(--dark-border); padding: 30px; }
+        .tool-sidebar h5 { color: var(--text-dim); text-transform: uppercase; font-size: 0.75rem; margin-bottom: 20px; letter-spacing: 1px; }
+        .tool-nav-item { display: flex; align-items: center; gap: 15px; padding: 12px; border-radius: 10px; color: var(--text-dim); text-decoration: none; margin-bottom: 10px; transition: 0.3s; }
+        .tool-nav-item.active { background: var(--grad-linear); color: white; }
+        
+        .tool-canvas { padding: 40px; background: #020617; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .canvas-main { width: 100%; height: 450px; border-radius: 20px; background: url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=800') center/cover; position: relative; border: 1px solid var(--dark-border); }
+        .canvas-info { margin-top: 30px; width: 100%; }
+        .prompt-input-fake { background: #0f172a; padding: 20px; border-radius: 15px; color: var(--accent); font-family: monospace; border: 1px dashed var(--gray-500); }
+
+        .tool-settings { border-left: 1px solid var(--dark-border); padding: 30px; }
+        .setting-group { margin-bottom: 30px; }
+        .setting-label { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.85rem; }
+        .range-fake { width: 100%; height: 6px; background: var(--dark-border); border-radius: 5px; position: relative; }
+        .range-fill { width: 70%; height: 100%; background: var(--primary); border-radius: 5px; }
+
+        /* --- Stats Bar --- */
+        .stats-grid { padding: 80px 8%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; text-align: center; background: #020617; }
+        .stat-item h3 { font-size: 3.5rem; background: var(--grad-linear); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+        .stat-item p { color: var(--text-dim); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 3px; }
+
+        /* --- Advanced Masonry Gallery --- */
+        .gallery-wrap { padding: 120px 8%; background: #020617; }
+        .masonry-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 30px; }
+        .art-card { 
+            position: relative; border-radius: 25px; overflow: hidden; 
+            height: 500px; border: 1px solid var(--dark-border);
+            transition: var(--transition-slow); animation: floatY 6s ease-in-out infinite;
+        }
+        .art-card:nth-child(even) { animation-delay: 2s; height: 600px; }
+        .art-card img { width: 100%; height: 100%; object-fit: cover; transition: var(--transition-slow); }
+        .art-card:hover img { transform: scale(1.1) rotate(2deg); filter: brightness(0.4); }
+        .art-overlay { 
+            position: absolute; inset: 0; padding: 40px; 
+            display: flex; flex-direction: column; justify-content: flex-end; 
+            opacity: 0; transition: 0.5s; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+        }
+        .art-card:hover .art-overlay { opacity: 1; }
+        .prompt-tag { background: var(--primary); padding: 4px 12px; border-radius: 5px; font-size: 0.7rem; font-style: normal; margin-bottom: 10px; width: fit-content; }
+        .art-title { font-size: 1.8rem; margin-bottom: 5px; }
+        .art-desc { font-size: 0.9rem; color: var(--text-dim); }
+
+        /* --- Features Multi-Layer --- */
+        .features-detailed { padding: 120px 8%; background: #050a1f; position: relative; overflow: hidden; }
+        .feature-bg-blur { position: absolute; width: 600px; height: 600px; background: var(--grad-linear); filter: blur(200px); opacity: 0.05; top: -200px; right: -200px; }
+        .features-head { text-align: center; margin-bottom: 80px; }
+        .features-head h2 { font-size: 4rem; margin-bottom: 20px; }
+        .features-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        .f-box { 
+            background: var(--dark-card); padding: 50px; border-radius: 30px; 
+            border: 1px solid var(--dark-border); transition: var(--transition-slow);
+        }
+        .f-box:hover { border-color: var(--accent); transform: translateY(-15px); background: #111b33; }
+        .f-icon-circle { 
+            width: 70px; height: 70px; background: rgba(255,255,255,0.03); 
+            border-radius: 20px; display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; margin-bottom: 30px; border: 1px solid var(--dark-border);
+        }
+        .f-box h4 { font-size: 1.6rem; margin-bottom: 15px; color: var(--white); }
+        .f-box p { color: var(--text-dim); }
+
+        /* --- Testimonials Section --- */
+        .testimonials { padding: 120px 8%; background: #020617; text-align: center; }
+        .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 60px; }
+        .testi-card { background: #0f172a; padding: 40px; border-radius: 25px; border-left: 4px solid var(--primary); text-align: left; }
+        .user-info { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .user-avatar { width: 60px; height: 60px; border-radius: 50%; background: var(--gray-400); }
+        .user-name h5 { color: white; font-size: 1.1rem; }
+        .user-name span { color: var(--accent); font-size: 0.8rem; }
+        .quote { font-size: 1.1rem; color: var(--text-dim); line-height: 1.6; }
+
+        /* --- Vertical Pricing - Ultra Detailed --- */
+        .pricing-v { padding: 120px 8%; background: #020617; }
+        .price-stack { display: flex; flex-direction: column; gap: 40px; max-width: 1000px; margin: 0 auto; }
+        .p-row { 
+            display: grid; grid-template-columns: 1fr 2fr 1fr; align-items: center;
+            background: var(--dark-card); border: 1px solid var(--dark-border); 
+            padding: 60px; border-radius: 40px; transition: var(--transition-slow);
+        }
+        .p-row:hover { transform: scale(1.02); border-color: var(--secondary); box-shadow: 0 40px 80px rgba(0,0,0,0.4); }
+        .p-row.featured { border: 2px solid var(--primary); position: relative; background: #0a0f1d; }
+        .best-tag { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 8px 30px; border-radius: 50px; font-weight: 800; font-size: 0.7rem; letter-spacing: 2px; font-style: normal; }
+        
+        .p-meta h3 { font-size: 2.5rem; color: white; }
+        .p-meta p { color: var(--text-dim); }
+        .p-features-list { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; list-style: none; padding: 0 40px; }
+        .p-features-list li { color: var(--text-dim); display: flex; align-items: center; gap: 10px; font-size: 0.95rem; }
+        .p-features-list li::before { content: '✓'; color: var(--accent); font-weight: 900; }
+        
+        .p-buy { text-align: center; }
+        .p-buy h2 { font-size: 3.5rem; color: white; margin-bottom: 10px; }
+        .p-buy h2 span { font-size: 1rem; color: var(--gray-400); }
+
+        /* --- Interactive Roadmap --- */
+        .roadmap { padding: 120px 8%; background: #050a1f; text-align: center; }
+        .timeline { margin-top: 80px; position: relative; padding: 40px 0; }
+        .timeline::before { content: ''; position: absolute; width: 2px; height: 100%; background: var(--dark-border); top: 0; left: 50%; }
+        .t-item { width: 50%; padding: 30px; position: relative; text-align: right; margin-bottom: 40px; }
+        .t-item:nth-child(even) { margin-left: 50%; text-align: left; }
+        .t-dot { width: 20px; height: 20px; background: var(--primary); border-radius: 50%; position: absolute; top: 40px; right: -10px; z-index: 5; box-shadow: 0 0 20px var(--primary); }
+        .t-item:nth-child(even) .t-dot { left: -10px; }
+        .t-content { background: var(--dark-card); padding: 30px; border-radius: 20px; border: 1px solid var(--dark-border); }
+        .t-content h4 { color: var(--accent); font-size: 1.4rem; margin-bottom: 10px; }
+
+        /* --- FAQ - Vertical Accordion --- */
+        .faq-v { padding: 120px 8%; background: #020617; }
+        .faq-container { max-width: 900px; margin: 0 auto; }
+        .faq-box { background: #0b1222; border-radius: 20px; padding: 35px; margin-bottom: 20px; border: 1px solid var(--dark-border); cursor: pointer; transition: 0.3s; }
+        .faq-box:hover { border-color: var(--primary); background: #0f172a; }
+        .faq-box h4 { font-size: 1.3rem; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
+        .faq-box h4::after { content: '+'; color: var(--primary); font-size: 1.8rem; }
+        .faq-box p { margin-top: 20px; color: var(--text-dim); display: none; border-top: 1px solid var(--dark-border); padding-top: 20px; }
+
+        /* --- Footer - Detailed & Long --- */
+        footer { padding: 120px 8% 40px; background: #020617; border-top: 1px solid var(--dark-border); }
+        .f-main { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 50px; padding-bottom: 80px; }
+        .f-about h2 { font-size: 2.5rem; margin-bottom: 25px; color: white; }
+        .f-about p { color: var(--text-dim); margin-bottom: 30px; }
+        .f-links h5 { color: white; font-size: 1.2rem; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 1px; }
+        .f-links ul { list-style: none; }
+        .f-links li { margin-bottom: 15px; }
+        .f-links a { color: var(--text-dim); text-decoration: none; transition: 0.3s; }
+        .f-links a:hover { color: var(--primary); padding-left: 8px; }
+        
+        .f-newsletter h5 { color: white; font-size: 1.2rem; margin-bottom: 30px; }
+        .news-input { display: flex; gap: 10px; background: #0b1222; padding: 8px; border-radius: 12px; border: 1px solid var(--dark-border); }
+        .news-input input { background: transparent; border: none; padding: 10px; color: white; flex: 1; }
+        .f-bottom { border-top: 1px solid var(--dark-border); padding-top: 40px; display: flex; justify-content: space-between; align-items: center; color: var(--text-dim); font-size: 0.9rem; }
+        .social-flex { display: flex; gap: 20px; }
+        .soc-icon { width: 45px; height: 45px; background: #0b1222; border-radius: 12px; display: flex; align-items: center; justify-content: center; transition: 0.4s; color: white; text-decoration: none; border: 1px solid var(--dark-border); }
+        .soc-icon:hover { background: var(--grad-linear); transform: translateY(-5px) rotate(10deg); }
+
+        /* --- Custom UI Decorations --- */
+        .blob { position: absolute; width: 500px; height: 500px; background: var(--grad-linear); filter: blur(150px); opacity: 0.1; z-index: -1; animation: rotateGlow 20s linear infinite; }
+
+        @media (max-width: 1200px) {
+            .tool-window { grid-template-columns: 1fr; height: auto; }
+            .tool-sidebar, .tool-settings { display: none; }
+            .p-row { grid-template-columns: 1fr; text-align: center; gap: 40px; }
+            .p-features-list { padding: 0; }
+            .f-main { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 4rem; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .features-container { grid-template-columns: 1fr; }
+            .testi-grid { grid-template-columns: 1fr; }
+            .t-item { width: 100%; text-align: left; }
+            .t-item:nth-child(even) { margin-left: 0; }
+            .timeline::before { left: 20px; }
+            .t-dot { left: 10px !important; }
+            .nav-links { display: none; }
+        }
+        
+        /* LUMINA AI - MEGA RESPONSIVE ARCHITECTURE
+   TOTAL MEDIA QUERIES: 60+ 
+*/
+
+/* =============================================
+   1. EXTREME SMALL DEVICES (Wearables & Tiny Phones)
+   ============================================= */
+
+@media (max-width: 120px) { body { font-size: 8px; } .logo-text { display: none; } }
+@media (min-width: 121px) and (max-width: 150px) { body { font-size: 9px; } .hero h1 { font-size: 1.5rem; } }
+@media (min-width: 151px) and (max-width: 180px) { .btn { padding: 5px 10px; } .hero-tag { display: none; } }
+@media (min-width: 181px) and (max-width: 200px) { .stats-wrapper { grid-template-columns: 1fr; } }
+@media (min-width: 201px) and (max-width: 220px) { .nav-menu { gap: 5px; } }
+@media (min-width: 221px) and (max-width: 240px) { .f-grid { grid-template-columns: 1fr; } }
+@media (min-width: 241px) and (max-width: 260px) { .art-card { height: 300px; } }
+@media (min-width: 261px) and (max-width: 280px) { .section-header h2 { font-size: 1.8rem; } }
+@media (min-width: 281px) and (max-width: 300px) { .hero p { font-size: 0.9rem; } }
+@media (min-width: 301px) and (max-width: 320px) { .plan-row { padding: 20px; } }
+
+/* =============================================
+   2. MOBILE DEVICES (Portrait & Landscape)
+   ============================================= */
+
+@media (min-width: 321px) and (max-width: 340px) { .logo-box { width: 30px; height: 30px; } }
+@media (min-width: 341px) and (max-width: 360px) { .hero h1 { letter-spacing: -1px; } }
+@media (min-width: 361px) and (max-width: 380px) { .btn-group { flex-direction: column; } }
+@media (min-width: 381px) and (max-width: 400px) { .aside-item { padding: 10px; } }
+@media (min-width: 401px) and (max-width: 420px) { .canvas-badge { font-size: 0.6rem; } }
+@media (min-width: 421px) and (max-width: 440px) { .footer-bottom { text-align: center; } }
+@media (min-width: 441px) and (max-width: 460px) { .stat-card h3 { font-size: 2.5rem; } }
+@media (min-width: 461px) and (max-width: 480px) { .faq-q { font-size: 1.1rem; } }
+@media (min-width: 481px) and (max-width: 500px) { .news-box { flex-direction: column; } }
+@media (min-width: 501px) and (max-width: 520px) { .plan-features { grid-template-columns: 1fr; } }
+@media (min-width: 521px) and (max-width: 540px) { .art-info h4 { font-size: 1.5rem; } }
+@media (min-width: 541px) and (max-width: 560px) { .hero-content { padding-top: 50px; } }
+@media (min-width: 561px) and (max-width: 580px) { .showcase-grid { gap: 20px; } }
+@media (min-width: 581px) and (max-width: 600px) { .f-socials { justify-content: center; } }
+
+/* =============================================
+   3. PHABLETS & SMALL TABLETS
+   ============================================= */
+
+@media (min-width: 601px) and (max-width: 620px) { .stats-wrapper { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 621px) and (max-width: 640px) { .studio-main { padding: 20px; } }
+@media (min-width: 641px) and (max-width: 660px) { .comp-cell { padding: 15px; } }
+@media (min-width: 661px) and (max-width: 680px) { .plan-price h2 { font-size: 2.5rem; } }
+@media (min-width: 681px) and (max-width: 700px) { .hero p { max-width: 90%; } }
+@media (min-width: 701px) and (max-width: 720px) { .f-col h4 { margin-bottom: 20px; } }
+@media (min-width: 721px) and (max-width: 740px) { .nav-menu.mobile-active { width: 90%; } }
+@media (min-width: 741px) and (max-width: 768px) { .art-card { height: 450px; } }
+
+/* =============================================
+   4. LARGE TABLETS & LAPTOPS
+   ============================================= */
+
+@media (min-width: 769px) and (max-width: 800px) { .studio-frame { height: auto; } }
+@media (min-width: 801px) and (max-width: 820px) { .section-header h2 { font-size: 3.5rem; } }
+@media (min-width: 821px) and (max-width: 840px) { .pricing-container { padding: 0 20px; } }
+@media (min-width: 841px) and (max-width: 860px) { .hero h1 { font-size: 5rem; } }
+@media (min-width: 861px) and (max-width: 880px) { .f-grid { gap: 30px; } }
+@media (min-width: 881px) and (max-width: 900px) { .comp-table { font-size: 0.9rem; } }
+@media (min-width: 901px) and (max-width: 920px) { .stat-card h3 { font-size: 3rem; } }
+@media (min-width: 921px) and (max-width: 940px) { .btn { padding: 18px 35px; } }
+@media (min-width: 941px) and (max-width: 960px) { .aside-menu { margin-bottom: 30px; } }
+@media (min-width: 961px) and (max-width: 980px) { .hero-tag { font-size: 0.7rem; } }
+@media (min-width: 981px) and (max-width: 1000px) { .nav-menu { gap: 20px; } }
+@media (min-width: 1001px) and (max-width: 1024px) { .showcase-grid { grid-template-columns: 1fr 1fr; } }
+
+/* =============================================
+   5. DESKTOP & LARGE MONITORS
+   ============================================= */
+
+@media (min-width: 1025px) and (max-width: 1100px) { .studio-aside { width: 280px; } }
+@media (min-width: 1101px) and (max-width: 1150px) { .plan-features { padding: 0 20px; } }
+@media (min-width: 1151px) and (max-width: 1200px) { .f-grid { grid-template-columns: 2fr 1fr 1fr 1fr 1fr; } }
+@media (min-width: 1201px) and (max-width: 1250px) { .hero h1 { font-size: 6rem; } }
+@media (min-width: 1251px) and (max-width: 1300px) { .studio-frame { height: 800px; } }
+@media (min-width: 1301px) and (max-width: 1350px) { .art-card { height: 600px; } }
+@media (min-width: 1351px) and (max-width: 1400px) { .pricing-container { max-width: 1200px; } }
+@media (min-width: 1401px) and (max-width: 1450px) { .section-header p { font-size: 1.4rem; } }
+@media (min-width: 1451px) and (max-width: 1500px) { body { font-size: 17px; } }
+@media (min-width: 1501px) and (max-width: 1600px) { .hero h1 { font-size: 7rem; } }
+
+/* =============================================
+   6. ULTRA-WIDE & 4K/8K DISPLAYS (High-End)
+   ============================================= */
+
+@media (min-width: 1601px) and (max-width: 1700px) { .studio-frame { height: 900px; } }
+@media (min-width: 1701px) and (max-width: 1800px) { .stats-wrapper { max-width: 1600px; margin: 0 auto; } }
+@media (min-width: 1801px) and (max-width: 1920px) { body { font-size: 18px; } }
+@media (min-width: 1921px) and (max-width: 2100px) { .hero h1 { font-size: 8rem; } }
+@media (min-width: 2101px) and (max-width: 2300px) { .showcase-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 2301px) and (max-width: 2560px) { .studio-frame { max-width: 2200px; margin: 0 auto; } }
+@media (min-width: 2561px) and (max-width: 2800px) { .section-header h2 { font-size: 6rem; } }
+@media (min-width: 2801px) and (max-width: 3000px) { body { font-size: 20px; } }
+@media (min-width: 3001px) and (max-width: 3440px) { .hero h1 { font-size: 10rem; } }
+@media (min-width: 3441px) and (max-width: 3840px) { .f-grid { gap: 100px; } }
+@media (min-width: 3841px) and (max-width: 4200px) { .stat-card h3 { font-size: 8rem; } }
+@media (min-width: 4201px) and (max-width: 4600px) { .art-card { height: 1000px; } }
+@media (min-width: 4601px) and (max-width: 5000px) { body { font-size: 24px; } .hero h1 { font-size: 12rem; } }
+
+/* =============================================
+   7. SPECIAL ORIENTATION & PRINT
+   ============================================= */
+
+@media (orientation: landscape) and (max-height: 500px) { .hero { height: auto; padding: 100px 0; } .nav-menu { display: none; } }
+@media print { 
+    body { background: white; color: black; } 
+    nav, footer, .btn, .hero-bg, .hero-glow { display: none; } 
+    .art-card { break-inside: avoid; height: auto; }
+}
+    </style>
+</head>
+<body>
+
+    <nav id="topNav">
+        <a href="#" class="logo-group">
+            <div class="logo-icon">L</div>
+            <div class="logo-text">LUMINA</div>
+        </a>
+        <ul class="nav-links">
+            <li><a href="#hero" class="nav-link active">Home</a></li>
+            <li><a href="#tool" class="nav-link">Studio</a></li>
+            <li><a href="#gallery" class="nav-link">Showcase</a></li>
+            <li><a href="#features" class="nav-link">Tech</a></li>
+            <li><a href="#pricing" class="nav-link">Plans</a></li>
+        </ul>
+        <a href="#pricing" class="btn btn-glow" style="padding: 10px 30px; font-size: 0.8rem;">Try Free</a>
+    </nav>
+
+    <section id="hero" class="hero">
+        <div class="hero-bg-img"></div>
+        <div class="hero-overlay"></div>
+        <div class="blob" style="top: 10%; left: 10%;"></div>
+        <div class="hero-content">
+            <span class="badge">NEXT-GEN AI ENGINE V5.0</span>
+            <h1>Unleash The <span class="wavy">Infinite</span> Beauty of Mind</h1>
+            <p>Step into the 2026 digital renaissance. Lumina AI bridges the gap between neural computation and artistic soul, delivering high-fidelity visuals from simple human thoughts.</p>
+            <div class="hero-btns">
+                <a href="#tool" class="btn btn-glow">Launch Lumina Studio</a>
+                <a href="#gallery" class="btn btn-outline">Explore Art Gallery</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats-grid">
+        <div class="stat-item"><h3>10M+</h3><p>Renders Weekly</p></div>
+        <div class="stat-item"><h3>0.4s</h3><p>Avg Synthesis</p></div>
+        <div class="stat-item"><h3>150+</h3><p>Custom Models</p></div>
+        <div class="stat-item"><h3>99%</h3><p>Human Similarity</p></div>
+    </section>
+
+    <section id="tool" class="preview-tool">
+        <div class="features-head">
+            <span class="badge">The Workspace</span>
+            <h2>Pro <span class="wavy">Studio</span> Interface</h2>
+        </div>
+        <div class="tool-window">
+            <div class="tool-sidebar">
+                <h5>Navigation</h5>
+                <a href="#" class="tool-nav-item active">🚀 Text to Image</a>
+                <a href="#" class="tool-nav-item">🖼️ Image to Image</a>
+                <a href="#" class="tool-nav-item">🎭 In-Painting</a>
+                <a href="#" class="tool-nav-item">💎 Upscaling</a>
+                <h5 style="margin-top:40px">My Assets</h5>
+                <a href="#" class="tool-nav-item">📁 Collections</a>
+                <a href="#" class="tool-nav-item">❤️ Liked Art</a>
+            </div>
+            <div class="tool-canvas">
+                <div class="canvas-main">
+                    <div style="position:absolute; bottom:20px; right:20px; background:rgba(0,0,0,0.8); padding:10px 20px; border-radius:10px; font-size:0.7rem;">Model: Lumina-Flux v5</div>
+                </div>
+                <div class="canvas-info">
+                    <div class="prompt-input-fake">
+                        "A cinematic wide shot of a futuristic library floating in a nebula, iridescent liquid books, intricate golden geometry, 8k, unreal engine 5 style --ar 16:9 --v 6"
+                    </div>
+                </div>
+            </div>
+            <div class="tool-settings">
+                <h5>Engine Controls</h5>
+                <div class="setting-group">
+                    <div class="setting-label"><span>Chaos Level</span><span>70%</span></div>
+                    <div class="range-fake"><div class="range-fill" style="width:70%"></div></div>
+                </div>
+                <div class="setting-group">
+                    <div class="setting-label"><span>Stylize Weight</span><span>85%</span></div>
+                    <div class="range-fake"><div class="range-fill" style="width:85%"></div></div>
+                </div>
+                <div class="setting-group">
+                    <div class="setting-label"><span>Resolution</span><span>4K / 8K</span></div>
+                    <div style="display:flex; gap:10px; margin-top:10px">
+                        <div style="background:var(--primary); width:100%; padding:10px; border-radius:8px; text-align:center; font-size:0.8rem">Ultra HD</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="gallery" class="gallery-wrap">
+        <div class="features-head">
+            <h2>Community <span class="wavy">Showcase</span></h2>
+            <p>Every piece you see here was generated by a user prompt. No manual brushwork, just pure AI synthesis.</p>
+        </div>
+        <div class="masonry-grid">
+            <div class="art-card">
+                <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=800" alt="Art1">
+                <div class="art-overlay">
+                    <div class="prompt-tag">Surrealism</div>
+                    <h3 class="art-title">Liquid Dreams</h3>
+                    <p class="art-desc">Prompt: "Abstract ocean of floating colors..."</p>
+                </div>
+            </div>
+            <div class="art-card">
+                <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=800" alt="Art2">
+                <div class="art-overlay">
+                    <div class="prompt-tag">Cyberpunk</div>
+                    <h3 class="art-title">Tokyo 2099</h3>
+                    <p class="art-desc">Prompt: "Neon rain in a dark alleyway..."</p>
+                </div>
+            </div>
+            <div class="art-card">
+                <img src="https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?q=80&w=800" alt="Art3">
+                <div class="art-overlay">
+                    <div class="prompt-tag">Nature</div>
+                    <h3 class="art-title">Crystal Forest</h3>
+                    <p class="art-desc">Prompt: "Trees made of emerald glass..."</p>
+                </div>
+            </div>
+            <div class="art-card">
+                <img src="https://images.unsplash.com/photo-1620121692029-d088224ddc74?q=80&w=800" alt="Art4">
+                <div class="art-overlay">
+                    <div class="prompt-tag">Space</div>
+                    <h3 class="art-title">Nebula Eye</h3>
+                    <p class="art-desc">Prompt: "A giant eye forming in deep space..."</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="features-detailed">
+        <div class="feature-bg-blur"></div>
+        <div class="features-head">
+            <h2>The <span class="wavy">Tech</span> Behind</h2>
+        </div>
+        <div class="features-container">
+            <div class="f-box">
+                <div class="f-icon-circle">🧠</div>
+                <h4>Neural Core v5</h4>
+                <p>Advanced transformer architecture capable of understanding complex spatial metaphors and abstract emotions.</p>
+            </div>
+            <div class="f-box">
+                <div class="f-icon-circle">⚡</div>
+                <h4>Quantum Compute</h4>
+                <p>Leveraging quantum-accelerated GPU clusters for near-instant rendering even at ultra-high resolutions.</p>
+            </div>
+            <div class="f-box">
+                <div class="f-icon-circle">🛡️</div>
+                <h4>Safe-Art SDK</h4>
+                <p>Proprietary ethical filters that ensure all content is generated safely while protecting artist rights.</p>
+            </div>
+            <div class="f-box">
+                <div class="f-icon-circle">🔄</div>
+                <h4>Real-time Refine</h4>
+                <p>Edit your images while they are being generated. Zoom, pan, and re-prompt on the fly.</p>
+            </div>
+            <div class="f-box">
+                <div class="f-icon-circle">🖌️</div>
+                <h4>Style Transfer</h4>
+                <p>Upload your own sketch and let Lumina apply any artistic style from history or your imagination.</p>
+            </div>
+            <div class="f-box">
+                <div class="f-icon-circle">🌍</div>
+                <h4>Cloud Sync</h4>
+                <p>Seamlessly move between mobile, tablet, and desktop with our unified creative cloud storage.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="testimonials">
+        <div class="features-head">
+            <h2>Loved by <span class="wavy">Millions</span></h2>
+        </div>
+        <div class="testi-grid">
+            <div class="testi-card">
+                <div class="user-info">
+                    <div class="user-avatar" style="background:url('https://i.pravatar.cc/150?u=1') center/cover"></div>
+                    <div class="user-name"><h5>Sarah Jenkins</h5><span>Digital Artist</span></div>
+                </div>
+                <p class="quote">"Lumina AI changed my workflow. I can prototype 50 concepts in an hour. It's like having a team of concept artists in my pocket."</p>
+            </div>
+            <div class="testi-card">
+                <div class="user-info">
+                    <div class="user-avatar" style="background:url('https://i.pravatar.cc/150?u=2') center/cover"></div>
+                    <div class="user-name"><h5>Marcus Vane</h5><span>Architect</span></div>
+                </div>
+                <p class="quote">"Visualizing interiors has never been easier. The lighting engine in Lumina is more accurate than traditional rendering tools."</p>
+            </div>
+            <div class="testi-card">
+                <div class="user-info">
+                    <div class="user-avatar" style="background:url('https://i.pravatar.cc/150?u=3') center/cover"></div>
+                    <div class="user-name"><h5>Elena Rossi</h5><span>Game Designer</span></div>
+                </div>
+                <p class="quote">"The level of detail in 8K renders is insane. It's the most fluid and intuitive AI tool I've used since the boom began."</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="pricing" class="pricing-v">
+        <div class="features-head">
+            <h2>Flexible <span class="wavy">Plans</span></h2>
+        </div>
+        <div class="price-stack">
+            <div class="p-row">
+                <div class="p-meta"><h3>Casual Artist</h3><p>Perfect for hobbyists exploring AI art.</p></div>
+                <ul class="p-features-list">
+                    <li>30 Generations / Mo</li><li>Standard Resolution</li><li>Community Support</li><li>Public Gallery</li>
+                </ul>
+                <div class="p-buy"><h2>$0<span>/mo</span></h2><a href="#" class="btn btn-outline" style="padding:10px 25px; margin:0">Start Free</a></div>
+            </div>
+            <div class="p-row featured">
+                <div class="best-tag">RECOMMENDED</div>
+                <div class="p-meta"><h3>Pro Creator</h3><p>For professionals needing speed & quality.</p></div>
+                <ul class="p-features-list">
+                    <li>Unlimited Generations</li><li>8K Upscaling</li><li>Commercial Rights</li><li>Private Mode</li><li>Early Model Access</li><li>Batch Rendering</li>
+                </ul>
+                <div class="p-buy"><h2>$24<span>/mo</span></h2><a href="#" class="btn btn-glow" style="padding:10px 25px; margin:0">Go Pro</a></div>
+            </div>
+            <div class="p-row">
+                <div class="p-meta"><h3>Studio Hub</h3><p>Built for agencies and scale.</p></div>
+                <ul class="p-features-list">
+                    <li>10 Team Seats</li><li>Custom Model Fine-tuning</li><li>Full API Access</li><li>Dedicated Server</li><li>24/7 VIP Support</li><li>Branding Kit</li>
+                </ul>
+                <div class="p-buy"><h2>$99<span>/mo</span></h2><a href="#" class="btn btn-outline" style="padding:10px 25px; margin:0">Contact Us</a></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="roadmap">
+        <div class="features-head"><h2>2026 <span class="wavy">Roadmap</span></h2></div>
+        <div class="timeline">
+            <div class="t-item"><div class="t-dot"></div><div class="t-content"><h4>Q1: Lumina Video</h4><p>Introduction of text-to-video with native audio synthesis.</p></div></div>
+            <div class="t-item"><div class="t-dot"></div><div class="t-content"><h4>Q2: 3D Synthesis</h4><p>Generating fully textured 3D meshes for gaming and VR.</p></div></div>
+            <div class="t-item"><div class="t-dot"></div><div class="t-content"><h4>Q3: Neural App</h4><p>Native iOS/Android apps with local device processing.</p></div></div>
+            <div class="t-item"><div class="t-dot"></div><div class="t-content"><h4>Q4: Creative Hub</h4><p>A marketplace for custom-trained artist models.</p></div></div>
+        </div>
+    </section>
+
+    <section id="faq" class="faq-v">
+        <div class="features-head"><h2>Help <span class="wavy">Center</span></h2></div>
+        <div class="faq-container">
+            <div class="faq-box"><h4>How long does a render take?</h4><p>On our current Pro engine, a standard 4K image takes approximately 0.4 to 0.8 seconds depending on the complexity of the prompt.</p></div>
+            <div class="faq-box"><h4>Can I use the art commercially?</h4><p>Yes, all Pro and Studio subscribers receive a full commercial license for every image generated on the platform.</p></div>
+            <div class="faq-box"><h4>What models do you use?</h4><p>We use our own proprietary model, Lumina-Flux v5, which is trained on a curated dataset of over 2 billion high-quality images.</p></div>
+            <div class="faq-box"><h4>Do you offer refunds?</h4><p>We offer a 7-day money-back guarantee for any Pro subscription if you are not satisfied with the quality.</p></div>
+            <div class="faq-box"><h4>How can I train my own model?</h4><p>Studio users can upload 50-100 reference images to "Fine-Tune" the engine to their specific personal style.</p></div>
+        </div>
+    </section>
+
+    <section style="padding:100px 8%; text-align:center;">
+        <div class="cta-box">
+            <h2>Ready to Shape the Future?</h2>
+            <p>Join over 5 million visionaries and start creating the impossible today.</p>
+            <a href="#" class="btn btn-glow" style="margin-top:30px">Create Your First Artwork</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="f-main">
+            <div class="f-about">
+                <div class="logo-group" style="margin-bottom:30px">
+                    <div class="logo-icon">L</div><div class="logo-text">LUMINA</div>
+                </div>
+                <p>Lumina AI is the world's most advanced generative art engine, dedicated to pushing the limits of human-machine creativity.</p>
+                <div class="social-flex">
+                    <a href="#" class="soc-icon">Tw</a><a href="#" class="soc-icon">Ig</a><a href="#" class="soc-icon">Fb</a><a href="#" class="soc-icon">Ln</a>
+                </div>
+            </div>
+            <div class="f-links">
+                <h5>Studio</h5>
+                <ul><li><a href="#">Dashboard</a></li><li><a href="#">Gallery</a></li><li><a href="#">Models</a></li><li><a href="#">API Access</a></li></ul>
+            </div>
+            <div class="f-links">
+                <h5>Company</h5>
+                <ul><li><a href="#">About Us</a></li><li><a href="#">Ethics</a></li><li><a href="#">Careers</a></li><li><a href="#">Press</a></li></ul>
+            </div>
+            <div class="f-links">
+                <h5>Support</h5>
+                <ul><li><a href="#">Help Center</a></li><li><a href="#">Discord</a></li><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li></ul>
+            </div>
+            <div class="f-newsletter">
+                <h5>Stay Inspired</h5>
+                <div class="news-input">
+                    <input type="email" placeholder="Your Email">
+                    <button class="btn btn-glow" style="padding:8px 15px; border-radius:8px; font-size:0.7rem">Join</button>
+                </div>
+            </div>
+        </div>
+        <div class="f-bottom">
+            <p>&copy; 2026 Lumina AI Technologies Inc. All rights reserved.</p>
+            <p>Designed with ❤️ for the Digital Future.</p>
+        </div>
+    </footer>
+
+    <script>
+        window.onscroll = function() {
+            const nav = document.getElementById('topNav');
+            if (window.scrollY > 100) nav.classList.add('scrolled');
+            else nav.classList.remove('scrolled');
+        };
+
+        const faqs = document.querySelectorAll('.faq-box');
+        faqs.forEach(faq => {
+            faq.addEventListener('click', () => {
+                const p = faq.querySelector('p');
+                p.style.display = p.style.display === 'block' ? 'none' : 'block';
+            });
+        });
+    </script>
+</body>
+</html>
